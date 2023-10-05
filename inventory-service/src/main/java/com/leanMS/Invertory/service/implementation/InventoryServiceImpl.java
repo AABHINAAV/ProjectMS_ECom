@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class InventoryServiceImpl implements InventoryService {
@@ -20,6 +19,22 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     public boolean isInStock(String skuCode) {
         return this.inventoryRepository.findBySkuCode(skuCode).isPresent();
+    }
+
+    @Override
+    public List<InventoryResponse> isInStock(List<String> skuCode) {
+        List<Inventory> availableInventories = this.inventoryRepository.findBySkuCodeIn(skuCode);
+
+        List<InventoryResponse> inventoryResponses = availableInventories.stream()
+                .map(
+                        inventory -> InventoryResponse.builder()
+                                .id(inventory.getId())
+                                .skuCode(inventory.getSkuCode())
+                                .quantity(inventory.getQuantity())
+                                .build()
+                ).toList();
+
+        return inventoryResponses;
     }
 
     @Override

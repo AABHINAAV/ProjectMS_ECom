@@ -2,36 +2,67 @@ package com.learnMS.Order.service.implementation;
 
 import com.learnMS.Order.dto.OrderLineItemsDto;
 import com.learnMS.Order.dto.OrderRequest;
+import com.learnMS.Order.dto.response.InventoryResponse;
 import com.learnMS.Order.dto.response.OrderLineItemResponse;
 import com.learnMS.Order.dto.response.OrderResponse;
 import com.learnMS.Order.model.Order;
 import com.learnMS.Order.model.OrderLineItems;
 import com.learnMS.Order.repository.OrderRepository;
 import com.learnMS.Order.service.OrderService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    private WebClient webClient;
+
     @Override
     public void placeOrder(OrderRequest orderRequest) {
-//        List<OrderLineItems> orderLineItems = orderRequest.getOrderLineItemsDtos()
-//                .stream()
-//                .map(orderLineItemsDto -> dtoToEntity(orderLineItemsDto))
-//                .toList();
         Order order = Order.builder()
                 .orderNumber(UUID.randomUUID().toString())
                 .orderLineItemsList(get_orderLineItems_From_orderLineItemsDtos(orderRequest))
                 .build();
 
-        this.orderRepository.save(order);
+        List<String> skuCodes = order.getOrderLineItemsList()
+                .stream()
+                .map(orderLineItems -> orderLineItems.getSkuCode())
+                .toList();
+
+        log.info(skuCodes.toString());
+
+//        call inventory service and place order if product is in stock
+        InventoryResponse[] inventoryResponses = webClient.get()
+                .uri("http://localhost:8003/api/inventory/checkAllInStock",
+                        uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
+                .retrieve()
+                .bodyToMono(InventoryResponse[].class)
+                .block();
+
+        if (inventoryResponses.length == 0) {
+            throw new IllegalArgumentException("Product is not in stock. Please try again later!!");
+        }
+
+        boolean allProductsInStock = Arrays.stream(inventoryResponses)
+                .allMatch(inventoryResponse -> inventoryResponse.getQuantity() > 0);
+
+        if (allProductsInStock == true) {
+            this.orderRepository.save(order);
+        } else {
+            throw new IllegalArgumentException("Product is not in stock. Please try again later!!");
+        }
     }
 
     private List<OrderLineItems> get_orderLineItems_From_orderLineItemsDtos(OrderRequest orderRequest) {

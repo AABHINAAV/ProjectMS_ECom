@@ -23,6 +23,12 @@ public class InventoryController {
         return this.inventoryService.isInStock(skuCode);
     }
 
+    @GetMapping("/checkAllInStock")
+    @ResponseStatus(HttpStatus.OK)
+    public List<InventoryResponse> isInStock(@RequestParam List<String> skuCode) {
+        return this.inventoryService.isInStock(skuCode);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public String addInventory(@RequestBody InventoryRequest inventoryRequest) {
