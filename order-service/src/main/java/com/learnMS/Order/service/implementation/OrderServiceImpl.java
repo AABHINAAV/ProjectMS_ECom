@@ -27,7 +27,7 @@ public class OrderServiceImpl implements OrderService {
     private OrderRepository orderRepository;
 
     @Autowired
-    private WebClient webClient;
+    private WebClient.Builder webClientBuilder;
 
     @Override
     public void placeOrder(OrderRequest orderRequest) {
@@ -44,8 +44,8 @@ public class OrderServiceImpl implements OrderService {
         log.info(skuCodes.toString());
 
 //        call inventory service and place order if product is in stock
-        InventoryResponse[] inventoryResponses = webClient.get()
-                .uri("http://localhost:8003/api/inventory/checkAllInStock",
+        InventoryResponse[] inventoryResponses = webClientBuilder.build().get()
+                .uri("http://INVENTORY-SERVICE/api/inventory/checkAllInStock",
                         uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
                 .retrieve()
                 .bodyToMono(InventoryResponse[].class)
