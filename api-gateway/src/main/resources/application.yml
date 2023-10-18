@@ -23,6 +23,20 @@ spring:
           predicates:
             - Path= /api/product
 
+# eureka discovery server
+        - id: DISCOVERY-SERVER
+          uri: http://localhost:8761
+          predicates:
+            - Path= /eureka/web
+          filters:
+            - SetPath= /
+
+# eureka discovery server static resources
+        - id: DISCOVERY-SERVER-STATIC
+          uri: http://localhost:8761
+          predicates:
+            - Path= /eureka/**
+
 
 eureka:
   instance:
