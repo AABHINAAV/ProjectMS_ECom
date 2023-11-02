@@ -8,3 +8,7 @@ eureka:
   client:
     register-with-eureka: false
     fetch-registry: false
+
+# credentials
+  username: eureka
+  password: password
