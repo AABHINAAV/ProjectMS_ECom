@@ -3,6 +3,7 @@ package com.learnMS.Order.controller;
 import com.learnMS.Order.dto.OrderRequest;
 import com.learnMS.Order.service.OrderService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ public class OrderController {
     @ResponseStatus(HttpStatus.CREATED)
     @CircuitBreaker(name = "inventory-service", fallbackMethod = "placeOrder_fallback")
     @TimeLimiter(name = "inventory-service")
+    @Retry(name = "inventory-service")
     public CompletableFuture<String> placeOrder(@RequestBody OrderRequest orderRequest) {
         return CompletableFuture.supplyAsync(() -> this.orderService.placeOrder(orderRequest));
     }
