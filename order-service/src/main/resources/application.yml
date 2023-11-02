@@ -28,3 +28,30 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://eureka:password@localhost:8761/eureka
+
+
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      inventory-service:
+        registerHealthIndicator: true                           # register circuit breaker with health indicator mentioned above
+        eventConsumerBufferSize: 10                             # buffer size of calls
+        slidingWindowType: COUNT_BASED                          # it will change to open state right away on first wrong call. it will use counting of wrong calls
+        slidingWindowSize: 5                                    # number of calls to be seen
+        failureRateThreshold: 50                                # 50% of calls of 10 fails then it will go to half open
+        waitDurationInOpenState: 5s                             # it will wait for 5seconds in full open state and then move to half open
+        permittedNumberOfCallsInHalfOpenState: 3                # number of calls to check in half open state if all fail then move to open state
+        automaticTransitionFromOpenToHalfOpenEnabled: true      # after 5s it will automatically move from open to half open state
