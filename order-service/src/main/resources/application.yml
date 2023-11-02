@@ -55,3 +55,9 @@ resilience4j:
         waitDurationInOpenState: 5s                             # it will wait for 5seconds in full open state and then move to half open
         permittedNumberOfCallsInHalfOpenState: 3                # number of calls to check in half open state if all fail then move to open state
         automaticTransitionFromOpenToHalfOpenEnabled: true      # after 5s it will automatically move from open to half open state
+
+  # for how long to wait for another service's response (timeout)
+  timelimiter:
+    instances:
+      inventory-service:
+        timeoutDuration: 3s
