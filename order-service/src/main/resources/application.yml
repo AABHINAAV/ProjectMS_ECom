@@ -20,6 +20,21 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
 
+  # kafka server
+  kafka:
+    bootstrap-servers:
+      - localhost:9092
+    template:
+      default-topic: ProjectMS-ECom-Topic
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer    # converts data to json while sending to kafka node
+      properties:
+        spring:
+          json:
+            type:
+              mapping: event:com.learnMS.Order.model.Order
+
 
   # services tracing using zipkin
   zipkin:

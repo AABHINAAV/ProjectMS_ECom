@@ -1,5 +1,6 @@
 package com.learnMS.Order.service.implementation;
 
+import com.learnMS.Order.config.KafkaProducerOrderService;
 import com.learnMS.Order.dto.OrderLineItemsDto;
 import com.learnMS.Order.dto.OrderRequest;
 import com.learnMS.Order.dto.response.InventoryResponse;
@@ -9,6 +10,7 @@ import com.learnMS.Order.model.Order;
 import com.learnMS.Order.model.OrderLineItems;
 import com.learnMS.Order.repository.OrderRepository;
 import com.learnMS.Order.service.OrderService;
+import com.netflix.discovery.converters.Auto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private WebClient.Builder webClientBuilder;
+
+    @Autowired
+    private KafkaProducerOrderService kafkaProducerOrderService;
 
     @Override
     public String placeOrder(OrderRequest orderRequest) {
@@ -60,6 +65,10 @@ public class OrderServiceImpl implements OrderService {
 
         if (allProductsInStock == true) {
             this.orderRepository.save(order);
+
+            // sending msg to kafka cluster
+//            this.kafkaProducerOrderService.publishMessageToKafkaCluster(order);
+
             return "Order Placed Successfully";
         } else {
             throw new IllegalArgumentException("Product is not in stock. Please try again later!!");
