@@ -1,0 +1,6 @@
+keycloak - 8050
+gateway - 8000
+discovery server - 8761
+inventory service - 8101
+order service - 8201
+product service - 8301
